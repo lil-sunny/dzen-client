@@ -1,4 +1,41 @@
-<script></script>
+<script>
+import CommentItem from '@/components/Feed/CommentItem.vue'
+import { mapActions, mapGetters } from 'vuex'
+
+export default {
+  components: {
+    CommentItem,
+  },
+  data() {
+    return {
+      text: '',
+      file: null, 
+    }
+  },
+  computed: {
+    ...mapGetters(['getComments']),
+    userId() {
+      return this.$route.params.id; 
+    },
+  },
+  mounted() {
+    this.getCommentsOnPost(this.userId);
+  },
+  methods: {
+    ...mapActions(['addComment', 'getCommentsOnPost']),
+
+    async sendComment() {
+      console.log('Відправляю коментар...')
+
+      this.addComment({ text: this.text, file: this.file })
+    },
+
+    handleFileChange(event) {
+      this.file = event.target.files[0]
+    },
+  },
+}
+</script>
 
 <template>
   <div class="bg-gray-800 min-h-screen">
@@ -54,57 +91,94 @@
         >
           Comments
         </h2>
-        <div class="comment-wrapper flex">
-          <div class="image-wrapper mr-2">
-            <div class="avatar rounded-full overflow-hidden w-[45px] h-[45px]">
-              <img
-                src="https://www.tryparrotai.com/_next/image?url=https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fparrot-prod-21b3c.appspot.com%2Fo%2Fcommunity%252FcoverPhotos%252F14992f96-5d18-48e3-96c4-7997996cd039%3Falt%3Dmedia%26token%3D76a86f97-01df-4ebf-ac76-0af5bb045616&w=828&q=75"
-                alt=""
-              />
-            </div>
-          </div>
-          <div class="message-wrapper flex w-full">
-             <div class="triagle-wrapper relative w-[12px] pt-2"> 
-              <div class="triagle top-0 w-[12px]">
-                <svg viewBox="0 0 80 92" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 51L80 0V92L0 51Z" fill="#209ad3" />
-                </svg>
+        <div class="comments-area-wrapper">
+          <!-- comment -->
+          <!-- <div class="comment-wrapper flex">
+            <div class="image-wrapper mr-2">
+              <div class="avatar rounded-full overflow-hidden w-[45px] h-[45px]">
+                <img
+                  src="https://www.tryparrotai.com/_next/image?url=https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fparrot-prod-21b3c.appspot.com%2Fo%2Fcommunity%252FcoverPhotos%252F14992f96-5d18-48e3-96c4-7997996cd039%3Falt%3Dmedia%26token%3D76a86f97-01df-4ebf-ac76-0af5bb045616&w=828&q=75"
+                  alt=""
+                />
               </div>
             </div>
-            <div class="message w-full overflow-hidden rounded-[10px] shadow-2xl">
+            <div class="message-wrapper flex w-full">
+              <div class="triagle-wrapper relative w-[12px] pt-2">
+                <div class="triagle top-0 w-[12px]">
+                  <svg viewBox="0 0 80 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 51L80 0V92L0 51Z" fill="#209ad3" />
+                  </svg>
+                </div>
+              </div>
+              <div class="message w-full overflow-hidden rounded-[10px] shadow-2xl">
                 <div class="message-header bg-[#209ad3] py-1 px-3">
-                    <span class="text-md text-white">Stephen Ainsworth</span>
+                  <span class="text-md text-white">Stephen Ainsworth</span>
                 </div>
                 <div class="message-text bg-[#27354e] py-2 px-3">
-                    <span class="text-md text-white">Stephen Ainsworth</span>
+                  <span class="text-md text-white">Stephen Ainsworth</span>
                 </div>
-            </div>
-          </div>
-        </div>
-        <div class="pl-[50px] my-[30px] comment-wrapper flex">
-          <div class="image-wrapper mr-2">
-            <div class="avatar rounded-full overflow-hidden w-[45px] h-[45px]">
-              <img
-                src="https://www.tryparrotai.com/_next/image?url=https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fparrot-prod-21b3c.appspot.com%2Fo%2Fcommunity%252FcoverPhotos%252F14992f96-5d18-48e3-96c4-7997996cd039%3Falt%3Dmedia%26token%3D76a86f97-01df-4ebf-ac76-0af5bb045616&w=828&q=75"
-                alt=""
-              />
-            </div>
-          </div>
-          <div class="message-wrapper flex w-full">
-             <div class="triagle-wrapper relative w-[12px] pt-2"> 
-              <div class="triagle top-0 w-[12px]">
-                <svg viewBox="0 0 80 92" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 51L80 0V92L0 51Z" fill="#209ad3" />
-                </svg>
               </div>
             </div>
-            <div class="message w-full overflow-hidden rounded-[10px] shadow-2xl">
+          </div> -->
+
+          <comment-item
+            v-for="comment in getComments"
+            :key="comment.id"
+            :comment="comment"
+          ></comment-item>
+          
+          <!-- answer -->
+          <!-- <div class="pl-[50px] my-[30px] comment-wrapper flex">
+            <div class="image-wrapper mr-2">
+              <div class="avatar rounded-full overflow-hidden w-[45px] h-[45px]">
+                <img
+                  src="https://www.tryparrotai.com/_next/image?url=https%3A%2F%2Ffirebasestorage.googleapis.com%2Fv0%2Fb%2Fparrot-prod-21b3c.appspot.com%2Fo%2Fcommunity%252FcoverPhotos%252F14992f96-5d18-48e3-96c4-7997996cd039%3Falt%3Dmedia%26token%3D76a86f97-01df-4ebf-ac76-0af5bb045616&w=828&q=75"
+                  alt=""
+                />
+              </div>
+            </div>
+            <div class="message-wrapper flex w-full">
+              <div class="triagle-wrapper relative w-[12px] pt-2">
+                <div class="triagle top-0 w-[12px]">
+                  <svg viewBox="0 0 80 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 51L80 0V92L0 51Z" fill="#209ad3" />
+                  </svg>
+                </div>
+              </div>
+              <div class="message w-full overflow-hidden rounded-[10px] shadow-2xl">
                 <div class="message-header bg-[#209ad3] py-1 px-3">
-                    <span class="text-md text-white">Stephen Ainsworth</span>
+                  <span class="text-md text-white">Stephen Ainsworth</span>
                 </div>
                 <div class="message-text bg-[#27354e] py-2 px-3">
-                    <span class="text-md text-white">Stephen Ainsworth</span>
+                  <span class="text-md text-white">Stephen Ainsworth</span>
                 </div>
+              </div>
+            </div>
+          </div> -->
+          <!-- message area -->
+          <div class="message-area p-2 rounded-md bg-[#181a2c]">
+            <div class="text-lg text-white mb-3">Add comment</div>
+            <div class="flex">
+              <textarea
+                v-model="text"
+                class="flex-11/12 border-1 border-gray-500 rounded-md p-2 text-white"
+                rows="5"
+              ></textarea>
+              <div class="actions-bar flex-1/12 relative flex flex-col justify-center items-center">
+                <input type="file" id="fileInput" class="hidden" @change="handleFileChange" />
+                <label
+                  for="fileInput"
+                  class="cursor-pointer p-2 rounded hover:bg-gray-100 transition flex items-center justify-center"
+                >
+                  <span class="material-icons text-gray-500 text-xl">upload</span>
+                </label>
+                <button
+                  @click="sendComment"
+                  class="button-send bg-blue-400 rounded-[50%] p-4 mt-2 flex items-center justify-center"
+                >
+                  <span class="material-icons text-white"> send </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
