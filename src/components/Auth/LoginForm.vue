@@ -1,7 +1,7 @@
 <script>
 import { mapActions } from 'vuex';
 import useVuelidate from '@vuelidate/core';
-import { required, minLength, sameAs } from '@vuelidate/validators';
+import { required, minLength } from '@vuelidate/validators';
 
 export default {
   data() {
@@ -9,9 +9,8 @@ export default {
       formData: {
         username: '',
         password: '',
-        repassword: ''
       },
-      v$: null
+      v$: null,
     };
   },
   validations() {
@@ -19,46 +18,32 @@ export default {
       formData: {
         username: { required },
         password: { required, minLength: minLength(8) },
-        repassword: {
-          required,
-          minLength: minLength(8),
-          sameAsPassword: sameAs(() => this.formData.password)
-        }
-      }
+      },
     };
   },
   created() {
     this.v$ = useVuelidate();
   },
   methods: {
-    ...mapActions('auth', ['login']), // викликає auth/login з модуля Vuex
-    async submitForm() {
+    ...mapActions(['login']), // Use the namespaced module here
+    submitForm() {
       this.v$.$touch();
 
       if (this.v$.$invalid) {
-        let errorMessage = "Please fill out all required fields correctly.\n";
+        let errorMessage = 'Please fill out all required fields correctly.\n';
 
         if (this.v$.formData.username.$invalid) {
-          errorMessage += "Username is required.\n";
+          errorMessage += 'Username is required.\n';
         }
 
         if (this.v$.formData.password.$invalid) {
           const errors = this.v$.formData.password.$errors;
           for (const err of errors) {
             if (err.$validator === 'required') {
-              errorMessage += "Password is required.\n";
+              errorMessage += 'Password is required.\n';
             }
             if (err.$validator === 'minLength') {
-              errorMessage += "Password must be at least 8 characters long.\n";
-            }
-          }
-        }
-
-        if (this.v$.formData.repassword.$invalid) {
-          const errors = this.v$.formData.repassword.$errors;
-          for (const err of errors) {
-            if (err.$validator === 'sameAsPassword') {
-              errorMessage += "Passwords do not match.\n";
+              errorMessage += 'Password must be at least 8 characters long.\n';
             }
           }
         }
@@ -66,21 +51,19 @@ export default {
         alert(errorMessage);
       } else {
         try {
-          await this.login({
+          this.login({
             username: this.formData.username,
-            password: this.formData.password
+            password: this.formData.password,
           });
-          alert("Login success!");
+          alert('Login success!');
         } catch (err) {
-          alert("Login error: " + err.message);
+          alert('Login error: ' + err.message);
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
-
-
 
 <template>
   <div class="login-form-wrapper min-w-[260px]">
@@ -106,7 +89,6 @@ export default {
           name="password"
           id="password"
           placeholder="Password"
-          :class="{'border-red-500': v$.password?.$invalid && v$.password?.$touched}"
         />
       </div>
       <div class="btn-wrapper flex flex-col items-center justify-center">

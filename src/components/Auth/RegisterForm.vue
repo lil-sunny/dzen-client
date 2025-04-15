@@ -8,7 +8,8 @@ export default {
     return {
       formData: {
         username: '',
-        password: ''
+        password: '',
+        repassword: ''
       }
     };
   },
@@ -16,7 +17,8 @@ export default {
     return {
       formData: {
         username: { required },
-        password: { required, minLength: minLength(8) }
+        password: { required, minLength: minLength(8) },
+        repassword: { required }
       }
     };
   },
@@ -58,6 +60,7 @@ export default {
           alert("Register successful!");
         } catch (err) {
           alert("Login failed: " + err.message);
+          console.log(err);
         }
       }
     }
@@ -82,6 +85,7 @@ export default {
           name="username"
           id="username"
           placeholder="Username or username"
+          v-model="formData.username"
           :class="{'border-red-500': v$.password?.$invalid && v$.password?.$touched}"
 
         />
@@ -94,6 +98,7 @@ export default {
           name="password"
           id="password"
           placeholder="Password"
+           v-model="formData.password"
           :class="{'border-red-500': v$.password?.$invalid && v$.password?.$touched}"
 
         />
@@ -106,7 +111,8 @@ export default {
           name="password"
           id="password"
           placeholder="Password"
-          :class="{'border-red-500': v$.password?.$invalid && v$.password?.$touched}"
+          v-model="formData.repassword"
+          :class="{'border-red-500': formData.password !== formData.repassword}"
 
         />
       </div>
