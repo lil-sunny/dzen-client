@@ -8,5 +8,9 @@ import HelloWorld from './components/HelloWorld.vue'
 </template>
 
 <style scoped>
-
+body {
+  position: relative;
+  padding: 0;
+  margin-top: 0;
+}
 </style>
