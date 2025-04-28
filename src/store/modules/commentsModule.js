@@ -1,6 +1,13 @@
 import gql from 'graphql-tag'
-import apolloClient from '@/apollo' // або імпортуй свій GraphQL клієнт
+import apolloClient from '@/apollo'
 import axios from 'axios'
+
+const token = localStorage.getItem('access_token')
+
+const storedUser = localStorage.getItem('user')
+const parsedUser = JSON.parse(storedUser)
+
+console.log(parsedUser)
 
 function buildCommentTree(comments) {
   const map = {}
@@ -24,6 +31,27 @@ function buildCommentTree(comments) {
   })
 
   return tree
+}
+
+const filterTagsFromText = (text) => {
+  const allowedTags = ['i', 'b', 'code']
+  const tagRegex = /<(\/)?([a-zA-Z0-9]+)([^>]*)>/g
+  let newText = text
+  let match
+
+  const tags = []
+  while ((match = tagRegex.exec(newText)) !== null) {
+    const fullTag = match[0]
+    const tagName = match[2].toLowerCase()
+
+    if (allowedTags.includes(tagName)) {
+      tags.push(fullTag)
+    } else {
+      newText = newText.replace(fullTag, '')
+    }
+  }
+
+  return newText
 }
 
 const state = () => ({
@@ -60,6 +88,7 @@ const mutations = {
     let newTree = buildCommentTree(clonedComments)
     state.comments = clonedComments
     state.tree = newTree
+    state.reply_comment = null
   },
 
   ADD_FILE: (state, data) => {
@@ -112,9 +141,14 @@ const actions = {
         variables: {
           post_id: Number(postId),
         },
+        context: {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json',
+          },
+        },
       })
 
-      // Комітуємо отримані коментарі в state
       commit('setComments', response.data.getCommentsOnPost)
     } catch (error) {
       console.log(error)
@@ -140,6 +174,8 @@ const actions = {
     if (!reply_to_comment_id) {
       reply_to_comment_id = null
     }
+
+    text = filterTagsFromText(text) 
 
     try {
       const response = await apolloClient.mutate({
@@ -176,9 +212,15 @@ const actions = {
         `,
         variables: {
           text,
-          author_id: 1,
+          author_id: Number(parsedUser.user_id),
           post_id: Number(post_id),
           reply_to_comment_id,
+        },
+        context: {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json',
+          },
         },
       })
 
@@ -222,6 +264,12 @@ const actions = {
               `,
               variables: {
                 id: Number(commentId),
+              },
+              context: {
+                headers: {
+                  Authorization: token ? `Bearer ${token}` : '',
+                  'Content-Type': 'application/json',
+                },
               },
             })
             console.log(updatedComment.data.getComment)

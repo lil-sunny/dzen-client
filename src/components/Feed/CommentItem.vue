@@ -59,7 +59,7 @@ export default {
             </button>
           </div>
           <div class="message-text bg-[#27354e] py-2 px-3">
-            <div class="text-md text-white">{{ text }}</div>
+            <div v-html="text" class="text-md text-white"></div>
             <div class="additional-file mt-8" v-if="additionalFilePath">
               <img v-if="isImageFile" :src="'http://localhost:5050' + additionalFilePath"
                 alt="Click to open in lightbox" @click="showLightbox = true"

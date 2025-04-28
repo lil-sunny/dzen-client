@@ -8,6 +8,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true },
     },
     {
       path: '/login',
@@ -24,8 +25,19 @@ const router = createRouter({
       path: '/post/:id',
       name: 'post',
       component: () => import('../views/PostView.vue'),
+      meta: { requiresAuth: true },
     },
   ],
 })
+
+router.beforeEach(async (to, from) => {
+  if (to.meta.requiresAuth) {
+    const isAuthenticated = localStorage.getItem('access_token');
+
+    if (!isAuthenticated) {
+      return '/login';
+    }
+  }
+});
 
 export default router

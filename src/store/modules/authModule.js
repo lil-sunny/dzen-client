@@ -1,5 +1,6 @@
 import gql from 'graphql-tag'
 import apolloClient from '@/apollo'
+import { jwtDecode } from 'jwt-decode'
 
 const state = () => ({
   user: null,
@@ -15,49 +16,59 @@ const mutations = {}
 
 const actions = {
   async login(_, user) {
-    const { data } = await apolloClient.mutate({
-      mutation: gql`
-        mutation Login($loginDto: LoginDto!) {
-          login(loginDto: $loginDto) {
-            access_token
+    try {
+      const { data } = await apolloClient
+        .mutate({
+          mutation: gql`
+            mutation Login($loginDto: LoginDto!) {
+              login(loginDto: $loginDto)
+            }
+          `,
+          variables: {
+            loginDto: {
+              username: user.username,
+              password: user.password,
+            },
+          },
+        })
+        .then((response) => {
+          const token = response.data.login
+          if (token) {
+            const decoded = jwtDecode(token)
+            localStorage.setItem('user', JSON.stringify(decoded))
           }
-        }
-      `,
-      variables: {
-        loginDto: {
-          username: user.username,
-          password: user.password,
-        },
-      },
-    })
-
-    const token = data.login.access_token
-    localStorage.setItem('access-token', token)
-    console.log('Access token:', token)
+          localStorage.setItem('access_token', token)
+        })
+    } catch (err) {
+      console.log(err)
+    }
   },
 
-  async register(user) {
-    console.log({ user })
+  async register(_, user) {
     try {
-      let { data } = await apolloClient.mutate({
-        mutation: gql`
-          mutation Register({$username: String, $password: String}) {
-            register(loginDto: { username: $username, password: $password })
+      let { data } = await apolloClient
+        .mutate({
+          mutation: gql`
+            mutation Register($loginDto: LoginDto!) {
+              register(loginDto: $loginDto)
+            }
+          `,
+          variables: {
+            loginDto: {
+              username: user.username,
+              password: user.password,
+            },
+          },
+        })
+        .then((response) => {
+          const token = response.data.register
+          
+          if (token) {
+            const decoded = jwtDecode(token)
+            localStorage.setItem('user', JSON.stringify(decoded));
           }
-        `,
-        variables: {
-          username: user.username,
-          password: user.password,
-        },
-      })
-
-      const token = data
-
-      console.log(data)
-
-      localStorage.setItem('access-token', token)
-
-      console.log(localStorage.getItem('access-token'))
+          localStorage.setItem('access_token', token)
+        })
     } catch (err) {
       console.log(err)
     }

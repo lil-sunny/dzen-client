@@ -24,7 +24,7 @@ export default {
   },
   methods: {
     ...mapActions(['register']), 
-    async submitForm() {
+    submitForm() {
       this.v$.$touch();
 
       if (this.v$.$invalid) {
@@ -53,11 +53,13 @@ export default {
         alert(errorMessage);
       } else {
         try {
-          await this.register({
+          let obj = {
             username: this.formData.username,
             password: this.formData.password
-          });
+          }
+          this.register(obj);
           alert("Register successful!");
+          this.$router.push('/');
         } catch (err) {
           alert("Login failed: " + err.message);
           console.log(err);

@@ -17,7 +17,7 @@ export default {
     return {
       formData: {
         username: { required },
-        password: { required, minLength: minLength(8) },
+        password: { required, minLength: minLength(5) },
       },
     };
   },
@@ -25,8 +25,8 @@ export default {
     this.v$ = useVuelidate();
   },
   methods: {
-    ...mapActions(['login']), // Use the namespaced module here
-    submitForm() {
+    ...mapActions(['login']), 
+    async submitForm() {
       this.v$.$touch();
 
       if (this.v$.$invalid) {
@@ -51,11 +51,11 @@ export default {
         alert(errorMessage);
       } else {
         try {
-          this.login({
+          console.log('okay')
+          await this.login({
             username: this.formData.username,
             password: this.formData.password,
-          });
-          alert('Login success!');
+          }).then(() => this.$router.push('/'));
         } catch (err) {
           alert('Login error: ' + err.message);
         }
