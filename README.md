@@ -1,29 +1,39 @@
-# client
+ # 🚀 Vue Server Setup
 
-This template should help get you started developing with Vue 3 in Vite.
+Цей прожкт створений на Vue, зібраний з Vite і включає в себе Vuex, Axios, Apollo server Та реалізовує блог з можливістю додавати повідомлення, включаючи текстові файли і картинки з реалізованою авторизацією.
 
-## Recommended IDE Setup
+## Рекомендоване налаштування IDE
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+Для детальної інформації з конфігурації можна ознайомитися з Vue Documentation
 
-## Customize configuration
+## Налаштування проєкту
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+Клонуй проєкт
 
-## Project Setup
+```sh
+git clone https://github.com/lil-sunny/dzen-client
+```
+```sh
+cd dzen-client
+```
+
+## Встановлення залежностей
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+## Редагування налаштувань .env
+
+замініть  на власні значеня для вхідної точки GraphQL серверу. Також вкажіть домен на якому знаходиться точка входу, або хост з портом
 
 ```sh
-npm run dev
+VITE_API_URL=http://localhost:5050/graphql
+VITE_HOST=http://localhost:5050
 ```
 
-### Compile and Minify for Production
+## Запустіть проєкт
 
 ```sh
-npm run build
+npx vite --port:4000
 ```
