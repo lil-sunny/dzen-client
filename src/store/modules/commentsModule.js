@@ -152,6 +152,7 @@ const actions = {
       commit('setComments', response.data.getCommentsOnPost)
     } catch (error) {
       console.log(error)
+      throw error
     }
   },
 
@@ -277,6 +278,7 @@ const actions = {
           })
           .catch((err) => {
             console.log('Помилка при завантаженні файлу:', err)
+            throw err
           })
       } else {
         console.log(response.data.addComment)
@@ -284,6 +286,7 @@ const actions = {
       }
     } catch (err) {
       console.log('Помилка в мутації:', err)
+      throw err
     }
   },
 

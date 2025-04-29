@@ -17,7 +17,7 @@ const mutations = {}
 const actions = {
   async login(_, user) {
     try {
-      const { data } = await apolloClient
+      await apolloClient
         .mutate({
           mutation: gql`
             mutation Login($loginDto: LoginDto!) {
@@ -33,20 +33,22 @@ const actions = {
         })
         .then((response) => {
           const token = response.data.login
+          console.log(token)
           if (token) {
             const decoded = jwtDecode(token)
+            console.log(JSON.stringify(decoded))
             localStorage.setItem('user', JSON.stringify(decoded))
           }
           localStorage.setItem('access_token', token)
         })
     } catch (err) {
-      console.log(err)
+      throw err
     }
   },
 
   async register(_, user) {
     try {
-      let { data } = await apolloClient
+      await apolloClient
         .mutate({
           mutation: gql`
             mutation Register($loginDto: LoginDto!) {
@@ -60,17 +62,17 @@ const actions = {
             },
           },
         })
-        .then((response) => {
-          const token = response.data.register
-          
+        .then(({ data }) => {
+          const token = data.register
+
           if (token) {
             const decoded = jwtDecode(token)
-            localStorage.setItem('user', JSON.stringify(decoded));
+            localStorage.setItem('user', JSON.stringify(decoded))
           }
           localStorage.setItem('access_token', token)
         })
     } catch (err) {
-      console.log(err)
+      throw err
     }
   },
 }

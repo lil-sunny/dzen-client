@@ -1,42 +1,73 @@
 <script>
 import CommentItem from '@/components/Feed/CommentItem.vue'
+import CaptchaItem from '@/components/Feed/CaptchaItem.vue'
+import { useRouter } from 'vue-router'
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
   components: {
     CommentItem,
+    CaptchaItem
   },
   data() {
     return {
       text: '',
       file: null,
       fileName: '',
-      reply_to_comment_id: null
+      reply_to_comment_id: null,
+      isCaptchaValid: false
     }
   },
+  setup() {
+    const router = useRouter();
+    return { router };
+  },
   computed: {
-    ...mapGetters(['getComments', 'getReplyComment', 'commentTree']),
+    ...mapGetters(['getComments', 'getReplyComment', 'commentTree', 'getPost']),
     postId() {
       return this.$route.params.id
     },
   },
-  mounted() {
-    this.getCommentsOnPost(this.postId)
-  },
-  methods: {
-    ...mapActions(['addComment', 'getCommentsOnPost', 'removeRepliedComment']),
-
-    async sendComment() {
-      if (this.getReplyComment) {
-        this.reply_to_comment_id = this.getReplyComment.id
+  async mounted() {
+    try {
+      console.log(this.postId)
+      try {
+        await this.getOnePost(this.postId)
+      }
+      catch (err) {
+        console.log(err)
       }
 
-      this.addComment({ text: this.text, file: this.file, post_id: this.postId, reply_to_comment_id: this.reply_to_comment_id })
+      await this.getCommentsOnPost(this.postId)
 
-      this.text = '';
-      this.file = null;
-      this.fileName = '';
-      this.reply_to_comment_id = null;
+    } catch (err) {
+      this.$router.push('/login')
+    }
+  },
+  methods: {
+    ...mapActions(['addComment', 'getCommentsOnPost', 'removeRepliedComment', 'getOnePost']),
+
+    onCaptchaSuccess(status) {
+      this.isCaptchaValid = status
+    },
+
+    async sendComment() {
+      if (this.isCaptchaValid) {
+        if (this.getReplyComment) {
+          this.reply_to_comment_id = this.getReplyComment.id
+        }
+
+        this.addComment({ text: this.text, file: this.file, post_id: this.postId, reply_to_comment_id: this.reply_to_comment_id })
+
+        this.text = '';
+        this.file = null;
+        this.fileName = '';
+        this.reply_to_comment_id = null;
+      }
+      else {
+        alert('Captcha is not valid')
+        this.$refs.captchaRef.resetCaptcha();
+      }
     },
 
     handleFileChange(event) {
@@ -57,13 +88,11 @@ export default {
     <div class="container max-w-[1024px] mx-auto">
       <article class="p-4">
         <div class="image_wrapper w-full rounded-4 overflow-hidden relative mb-4">
-          <img
-            src="https://images.unsplash.com/photo-1480694313141-fce5e697ee25?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=602&h=320q=80"
-            class="w-full rounded-[25px]" />
+          <img :src="getPost?.image_path" class="w-full rounded-[25px]" />
           <div class="absolute gradient w-full h-64 md:h-80 rounded-lg z-10"></div>
           <div class="absolute left-0 right-0 bottom-0 p-4 z-30">
             <h1 class="font-bold text-white leading-tight sm:mb-2 group-hover:underline text-2xl md:text-3xl">
-              The technology helping keep women safe on the streets
+              {{ getPost?.title }}
             </h1>
             <div class="text-xs text-white hidden sm:block">
               <div class="flex items-center">
@@ -73,18 +102,13 @@ export default {
                     d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z">
                   </path>
                 </svg>
-                <span class="text-xs text-white">20h | Stephen Ainsworth</span>
+                <span class="text-xs text-white">{{ getPost?.createdAt }}</span>
               </div>
             </div>
           </div>
         </div>
-        <h2 class="text-white font-bold text-lg md:text-xl leading-tight transition group-hover:underline mb-4">
-          Google issues warning to location-sharing apps
-        </h2>
         <p class="text-md lg:text-lg text-gray-300">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam ducimus asperiores officiis
-          illum in harum nostrum, vitae natus doloremque autem nobis sit, quos voluptatum sint qui
-          eligendi cumque placeat praesentium!
+          {{ getPost?.description }}
         </p>
         <hr class="border-2 my-4 bg-gray-100" />
         <h2 class="text-white font-bold text-lg md:text-xl leading-tight transition group-hover:underline mb-4">
@@ -134,6 +158,8 @@ export default {
                 </label>
 
                 <div v-if="fileName" class="text-white mt-2">{{ fileName }}</div>
+
+                <captcha-item ref="captchaRef" @captcha-success="onCaptchaSuccess" />
 
                 <button @click="sendComment"
                   class="button-send bg-blue-400 rounded-[50%] p-4 mt-2 flex items-center justify-center">

@@ -98,10 +98,10 @@ export default {
         >
           Login
         </button>
-        <a class="text-green-700 text-center">
+        <p class="text-center text-black mt-2">
             Haven't account? 
-            <router-link to="register">Register</router-link>
-        </a>
+            <router-link class="text-green-700" to="register">Register</router-link>
+        </p>
       </div>
     </form>
   </div>
